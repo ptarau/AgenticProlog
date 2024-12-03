@@ -1,0 +1,529 @@
+
+
+Aug 1-11: updated line, created bridge with styla
+
+2015: 
+
+
+TODO: - wrap up non-fatal Java exceptions as Prolog throws DONE
+      - move dynamics from term_of to compile, consult etc.
+      - assert to the database directly when detecting compilation to memory
+      - ensure that portray_clause writes out something the parser
+        can read back
+      - fix minor parser glitches - 
+           ops need quotes even if as in (-),(dynamic) 
+           0'a etc
+      - make findall faster - with direct implementation
+      - add 'c' chars as atoms - for ISO compatibility
+      - add automatic index discovery for consulted dbs
+      - move most of the compiler to Java - for 100-200% speed-up
+
+jul 30
+  set_format_precision and 3.14E-3 - like numbers parser fix
+  
+jul 14, 2011 ver. 2.16.2 added:
+
+write_canonical
+writeq
+read_term with variables and line info
+set_prolog_flag
+current_prolog_flag
+getenv/2
+atom_chars/2
+
+jul 13, 2011
+
+changed parser to support (op) notation
+changed compiler to support empty dynamics
+
+may 8 
+
+  - added read, read/2 with close to ISO semantics
+  - added append mode to open/3
+
+may 7
+  -- refactored components
+
+may 6
+  -- refactored crossref testing 
+
+may 5
+  -- refactored compile - added fcompile, bcompile - now dynamics are handled when compile to memory or to *.bp or 1 wam
+
+may 3
+  - added term_expansion
+
+some of the changes are not reported here
+
+-- 2011 --
+
+
+aug 2: 1.9.2 fixed large term transfers to use iterators and/or non-recursive internalization
+
+aug 1: 1.9.1 fixed LogicEngine bug: stop()->E.stop() engines were "suicidal" :-)
+        fixed term comparison with large terms bug - avoiding crash when $null was
+        compared to a large term unnecessarily externalized
+
+july 31 - major refactoring, attempting to enable fast arbitrary size
+          data exchanges between engines, threads, processes etc.
+          
+  NOTES:
+      - println uses inner servers to manage redirection
+      - engines were using inefficient (but safe) toInternal and toExternal methods
+      - switch to fast data exchange seems to induce some unexpected symgc problems
+        extremely arodous to track down 
+
+july 24 fixed qcompile bug - use find_prolog_file instead of find_file - that includes wam files
+
+july 21
+      fixed db_* operations - clause heads were sent in full rather than trimmed for indexing
+      db operations were crashing of thing like list with 50000 elements were in the clause heads
+      when asserting large facts
+      
+june 24 1.6.1
+      added bp_terms/java_terms to turn prolog_flag on/of for BinProlog
+      compatible remote_ru/run_server
+      
+      added force_encoding_of(+S,+OldEnc,+NewEnc,-NewS) and mac2utf/2 and win2utf/2 forcing
+      explicit string encoding conversion
+      
+june 23 1.6.0
+      unicode - commitment to UTF-8 by default
+      added set_encoding(+Name) get_encoding(-Name)
+      replaced FileReaders with Interact.safeFileReader
+      attempting the use of the defaultEncoding on everything read
+      use set_encoding/1 as needed
+      
+june 16:
+      added global_gensym and friends - with values seen accross a process
+      added db_ensure_bound/1 - generates, if arg unbound, '$0', '$1', .. as Db name
+      
+june 11: 
+     fixes on error handling in arithmetic operations - more meaningful messages
+     
+june 9-10:
+    added crossref_warnings - significant changes in the compiler
+    
+june 2
+
+    added iso compliant subatom - and a few other iso goodies
+    changed find_file to have "" instead of "." which was breaking absolute file names
+    
+    added 
+       sublist_of_length(K,List,Sublist)
+       words2sentence(Words,Sentence)
+          
+1.3.3 May 11
+       added: 
+        xsave(File,Db), 
+        xcause_of(File,Clause), xload(File,Db), xappend(File,Db)
+        
+1.3.2 - May 8
+        added words_of(File,Words) fixed read_words/2 - returns [] on eof now
+        fixed bugs in op/3 - now adding and removing new ops works at user level
+     
+1.3.0 - May 4:
+      - fixed some complex iso compatibility issues related to
+        recognizing big integers and big decimals as ordinary
+        ints and floats with integer(X) and float(X)
+      - included ISO prolog tests as part of components
+       
+        made the test driver compile for lvanilla.pl (everything except two files)
+        made run_test run - with relatively few incompatibilities (mostly
+        pedantic) left to fix
+        
+1.2.18  - May 2
+      
+      - improved ISO compliance
+      - added unify_with_occurs_check
+      - extended proper type recongnition to big integers and decimals
+      - improved handling of things like -3.14 => mapping to $number for
+        bignums
+        
+1.2.17 - april 30 -
+       major compiler changes:  - watch for side effects !!!
+       
+       activated find_file inside the compiler
+       tolerant with :-[file] onstead of :-['file.pl'].
+       
+       changes in the compiler - now accepting:
+       :-ensure_loaded
+       :-include
+       :-discontiguous
+       :-set_prolog_flag/get_prolog_flag - just global vars for now
+       
+       also, added script swicompile - uses the SWI parser for
+       things that we cannon handle and generates *.wam file
+       that can be loade as usual e.g.
+       
+54: ~/Desktop/go/code/prologL> swicompile "bin/progs/nrev"
+% library(swi_hooks) compiled into pce_swi_hooks 0.00 sec, 4,264 bytes
+%  ../psrc/builtins compiled 0.00 sec, 13,352 bytes
+%  fco compiled 0.00 sec, 7,488 bytes
+%  lco compiled 0.01 sec, 110,088 bytes
+% /Users/tarau/Desktop/go/code/prologL/compiler/swico.pl compiled 0.01 sec, 141,152 bytes
+55: ~/Desktop/go/code/prologL> cd bin/progs
+56: ~/Desktop/go/code/prologL/bin/progs> mv -f nrev.wam boo.wam
+57: ~/Desktop/go/code/prologL/bin/progs> lprolog
+
+main ?- [boo].
+entering(./boo.wam)
+./boo.wam ?- big.       
+       
+Note: customize script swicompile if needed for actual location of files
+       
+1.2.16 - april 21
+        added LogicInteractor.readTerm()+openReader(fname) exposing the Prolog parser to Java
+1.2.15 - april 17-20
+       fixed byzatine bg/1 bug - exceptions in bg(Goal) were not printed out
+1.2.13 - april 16 
+      networking debugged
+      added add_to_path, gvars, fixed $null bug in ==> <==
+      various changes in components/agents
+
+1.2.5 april 2 - fixed strange bug in which symbols where shared even in
+                cloned Prologs - in AtomDict, freshCopyFrom
+                (Sym objects needed individual explicit cloning - now using 
+                new copy constructor)
+                
+1.2.4 march 31 - major changes in components
+
+1.2.3  march 9 - added catch_once - needed to avoid memory leaks in services
+                 using engines to catch errors
+1.2.2: march 8
+      - bug fix in atom_to_term, '.' added automatically now to end of atom
+      - bug fix in OuterTask - bg on each task needs complete rewriting
+        see components/src/net
+      - server reverted to s_server - single threaded, transaction based
+      - backgrounding server to be added in components/src/net
+      
+1.2.1: march 5
+       moved linda + agent layer as a separate component is src/agents
+       out of the main Prolog simple - meant to stay simple  
+       
+1.2.0: march 2
+      - added callback based linda API, type help(linda) for info.
+      
+  
+        the linda_server is meant to act as an agent broker from
+        where agents post tasks and get work orders using in/1 out/1
+        
+      - after that, they are encouraged to use open_dialog for
+        high-performance peer to peer communication, type
+
+        help(dialog) for info
+        
+      - optimized networking layer, fixed some s_server s_client bugs coming
+        from spurious backtracking in tell_interactor
+
+1.1.8: feb 22: 
+        the help system now also searches to user defined predicates
+        like "apropos" in other Prologs
+        - some minor bug fixes to the help system
+        - documenting some extra builtins - total now 237
+
+1.1.7:  fixed bug with s_stop, made networking layer simpler and more robust
+       added current_atom, current_predicate, predicate_property etc.
+       
+
+1.1.5 feb 14 - added command line scripting something like (run in dir prologL):
+   run "[nrev]" "small" "qcompile(allperms)" "go" "println(bye),halt"
+   will work and navigate through multiple modules and execut goals there 
+
+1.1.1 feb 10: finished integration of LeanProlog in old prolog
+              where newcall(Goal) can call it from there
+   
+1.0.18 jan 28 - fixed some syntax glitches in the tokenizer/parser interface - 
+                error messages are now printed rather than returning the term
+                syntax_error(T) inadvertanly
+
+1.0.17 jan 27 - added GUI as part of the components.zip extension 
+
+1.0.16 jan 24 - java exceptions thrown in 102 xbuiltins 
+                are now caught and converted into Prolog exceptions
+              - bug in catch fixed (used to always fail, handler backtracked)
+              - toplevel refactored - now interactive - also
+                subtile bug related to starting toplevel
+                after compiling new file fixed
+              - qcompile/1 added:
+                 => "consult(a),consult(b),qcompile(c)." ok on cmd line 
+      
+1.0.12 jan 23
+      - added is_indexed(ClauseHead)
+      - we now give errmes for index(a(1)),assert(a(_))
+1.0.12 jan 22
+     standard Prolog toplevel behavior (;)= more solutions, enter=stop
+     ord_interesction and friends added to lists.pl (SWI compat)
+     
+1.0.11 jan 21
+     added word_of, codes_words, read_words, match_before
+     to facilitate various NLP tasks
+
+1.0.9 jan 18 fixed bug in s_server stopping when goals were failing
+     added open_dialog/close_dialog -- enabling reliable, high volume 1-to-1 peer transactions
+     see code in xnet.pl + xtests.pl
+     changed s_stop and s_halt to act on host/port rather than connection
+     old versions renamed to s_stop_at, s_halt_at stop server/process acting on connections
+     added save(<File>) load(<File>) saving/loading all databases to/from <File>.px
+  
+1.06 jan 16, 2010 worked around Java bug in StreamTokenizer - lineno() now working ok, 
+                warning singleton Tokenizer errors accurate
+                fixed xdb_save bug by making vm.extension.Rev serializable
+		xdb_save(File) + xdb_load(File) provide reliable and 
+		superfast saving + reloading of indexed dynamic code
+		it also compresses the code
+		control on fastfail + verbosity
+		set_quickfail(V,OldV)+set_verbosity(V,OldV) can control error survival and verbosity of
+		error messages (the lower the quieter and more forgiving) 
+		- USE with CAUTION, only in production code delivered to users !!! 
+									
+									
+
+1.05 jan 15 - bug fixed in current_op(X,Y,Z)
+     Tokenizer bug fixed: in "a(1) . " => "." was not recognized as end of clause.
+:-multifile now handled as dynamic
+:-Goals are now executed - at the user's own risk, like in SWI. Use only
+on goals referring to library code and dynamic code, do not refer to code still waiting to be compiled.
+:-dynamic fn,gm,... . works
+:-multifile fn,gm,... . works   
+		 
+1.04 jan 14 s_server and i_server fixes s_stop, i_stop now work without shutting down process
+
+1.02 jan 6 added db_asserta, asserta
+
+1.0 jan 4 released as stable version
+    added get_code, removed debug info -  fixed float poind bug pbm 15-16s
+    fine tuned some initial settings
+    fixed eb_assert and speeded up from 4KLIPS to 19KLIPS thanks to
+    fast "==" using "same_vars"
+    
+0.9.8 jan 2 fast copy_term, new term comparison (written in Java)
+      fast +,-*,ncompare as icall_op builtins
+
+0.9.7 dec 27 added bg, mbg
+      
+0.9.6 dec 25 added multithreading - with answers collected by on a hub
+
+0.9.3 dec 24
+	- started work on adding GUI added, also s_console planned to run s_server in a gui panel
+	- full reflection layer added - same API as the old Prolog, except that objects are collected by symgc
+
+  - SYMGC bug fixed by making sure that:
+  - engines that are know to have indefinite extend will self_protect
+	- engines will be checked that they do not self_reference on their heaps - only refs from others count
+
+0.9.0 dec 18
+
+  - The SYMGC bug, triggered by not finding in i2o some symbols (usually located close
+	  to the top ). The major change, involves re-orchestrating the
+		complex interactions between symbol creation, heap gc, large number 
+                arithmetics (also using symbols), engine creation/destruction etc.
+		A key element helping with the problem is scheduling it to be performed right
+		before a new call rather than doing it immediately on symbol creations.
+
+0.8.6 dec 9, 2009
+
+dynamic/1, index/1, op/3 declarations now work when:
+
+a) code is compiled to memory - i.e. the usual Prolog behavior in SWI, Yap etc.
+b) when code is compiled to *.bp file as a self-contained replacement to
+   wam.bp - recommended for large applications - see tests xgo, x.pl on how
+	 to generate such files
+
+It is not implemented for files that are compiled individually to *.wam - as having
+actions consistently attached to each file breaks composability (currently they
+can just be concatenated to any *.bp file and become part of the compiled code.
+
+0.8.5 dec 8, 2009
+
+- replaced legacy Dict.java with new code using HashMaps
+- fixed bug with is_dynamic in findall
+
+0.8.4 dec 7, 2009
+
+- major bug fixes in the i/o subsystem
+- added basic ISO Prolog set_input/curent_input etc. open/3 close/1
+- prototyped handling of dynamic declarations and embedding of
+  dynamic code in files - implementation is tedious but at least
+	there are ways to achieve it: 
+	
+	in both scenarios, given that the indexer works on dynamic code
+	it is assumed, given the implementation, that index/1 declarations
+	also count as dynamic/1 declarations 
+	
+	scenario 1)
+	  - initally dynamic code is compiled as usual
+		- when a first assert or retract to a predicate happens,
+		  the code is abolished/deactivated and replaced with trully dynamic code - compiled as a saved
+			list of clauses during compilation
+    - this means dynamic code, if unchanged, will run fast
+	  - this also means that consulted/reconsulted code will only
+		  be slowed down for predicates that are actually changed
+   scenario 2)
+	  - assumes that the compiler written in Lean Prolog is used
+	  - code is always first compiled to a file, before loading tho memory, i.e
+		  a shadow *.wam file contains the static code and a *.dyn file contains the 
+			dynamic code associated to a *.pl file
+	  - the user is trusted with dynamic declarations in a file and such code
+		  is actually indexed at compile time - making such clauses automatically 
+			dynamic (as the indexer assumes dynamic code)
+   scenario 3)
+		- dynamic clauses are compiled to
+		  '$dynamic'(H,B) and written as such in the wam file
+			the loader watches for such predicates and renames their clauses
+			'$dynamic_1'(H,B)...'$dynamic_1'(H,B)... etc.
+			prolog_init collects and asserts these predicates
+   
+- a side note: the posibility to move entire agent societies, represented as the compressed
+state of an indexed database, including a set of current goals to be resumed at a new site
+
+- posibility to have a global p2p shared database that is intelligently synchronized
+  with local updates
+	
+- simple agent api: each agent is just a named db that has indefinite extent	
+  maintained as db_asserted code
+	
+	agent_name:goal executes goal in db specified by agent
+
+0.8.3 dev 5 2009
+
+
+new indexed db made default - assert+friends all built on it
+bug with => ==> fixed - now global means within process, local
+within "Prolog" objects assert/clause are global within process
+db_assert(<named_db>,...) is also global i.e. the same name
+is seen as being the same anywhere
+
+it indexes wordnet 3.0 in 7 mins - than loads indexed file in 20 sec
+
+also added line_of, line_codes_of, code_of reading from a file
+
+also added atom_to_term + term_to_atom in LogicInteractor -  making
+the Prolog parser/writer available to act from/to Java strings
+
+
+0.8.1
+
+major parser fix - performance improved by avoiding reading
+a complete file to memory
+
+0.7.3 nov 30 2009
+
+- *.wam files now composable by concatenation
+- wcompile(File) converts File.pl to File.wam
+- [File]. or mcompile(File) now works as "make" it loads
+  the *.wam file (very fast) if there and newer, explicitely precompiled
+  with wcompile/1. It does not automatically compile, to evoid clutter
+  in directories, but that can be changed if needed.
+- component technologies: lprolog.jar now can be
+  extended by automatically discovering "components" in 
+  (see components.zip, type "go" - possibly adjust path info)
+- indexer now works without google.collections - functionality
+  emulated with much smaller (ans lightly faster in-house MMap.java
+  see files in components xdb.pl and tests/benchmarks in xbm.pl
+  and, for swi, for comparison in dbm.pl)
+
+0.6.1 nov 24 2009
+
+inner sockets - virtual client/server pairs
+running on different threads
+
+- use Hub pairs, similar to sockets to communicate
+
+performance about twice that of sockets
+
+see various tests in xtests.pl
+
+i_client_test:-
+ i_server(S),
+ i_test1(S,aaa),
+ i_test1(S,bbb),
+ i_connection(S,C),
+ i_stop(C).
+ 
+ 
+?- i_client_test(1000,1000).
+done(1000, len(1000))
+time(isock_test1(vm.extensions.ServicePair@919db9e, 1000, 1000), 0.8590000000000000)
+true.
+
+0.6.0 better error processing - exceptions are sent to clients
+server survives exceptios but prints out error messages
+server shutdown (both socket and inner)
+bug fixed: is_dynamic was making predicates dynamic
+undefined preds were only shown on first error
+
+0.5.9 export_term/import_term allows exchanges
+large terms as heap+symtable images rather than string or Fun/Var external terms
+avoids stack overflow problems with recursing on very large terms
+
+
+0.5.8 nov 20 2009
+-------------------
+% shared memory for large objects
+
+shm_test:-
+ N is 3/7,
+ T=f(A,A,g(hello,N)),
+ shm_put(boo,T),
+ shm_get(boo,X),
+ shm_remove(boo),
+ println(T=X),
+ numlist(1,1000000,L),
+ time(shm_put(boo,L),T1),
+ time(shm_get(boo,_),T2),
+ shm_remove(boo),
+ println(put(T1)+get(T2)).
+
+
+-------------------
+0.5.6 nov 15 2009
+
+new networking API
+
+--------
+window 1:
+
+?-s_server(Port).
+
+ or just
+
+?-s_server. % defaults to Port=4444
+% also s_server(InitialGoal)
+% also s_server(Port,InitialFileBp,Goal)
+
+--------
+window 2:
+
+s_connection(Host,Port,Connection)
+
+or
+
+s_connection(Connection) % defaults to 4444
+
+% this should be typed on one line
+?-s_connection(C),
+    s_run_at(C,println(hello)),run_at(C,println(bye)),
+  s_disconnect(C).
+
+or just run 
+
+?-s_client_test.
+
+Performance test (see xbuiltins.pl) :
+
+s_client_stest(NumberOfSendReceives,DataSize)
+
+?- s_client_test(4000,100).
+done(4000, len(100))
+time(sstest1(vm.extensions.Transport@17207a76, 4000, 100), 1.1990000000000000)
+true.
+
+Also:
+
+9000 small exchanges / sec,
+1000 lists of 1000 ints each / sec 
+and 1 list of 70000 ints / sec.
+
+
+

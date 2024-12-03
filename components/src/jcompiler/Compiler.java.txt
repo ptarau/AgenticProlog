@@ -1,0 +1,336 @@
+package jcompiler;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import vm.logic.Defs;
+import vm.logic.Fun;
+import vm.logic.Interact;
+import vm.logic.LogicInteractor;
+import vm.logic.Start;
+import vm.logic.Var;
+
+/**
+ * prolog Compiler - Java based: see psrc/co.pl for Prolog version
+ */
+public class Compiler extends Defs {
+  public static boolean trace=true; // shows some data
+  
+  public static boolean delegating=true; // asks the Prolog based compiler to do
+  
+  private Compiler(){
+  }
+  
+  static final boolean add_instr(LogicInteractor machine,int op,int reg,
+      String f,int n) {
+    try {
+      machine.add_instr(0,op,reg,f,n); // to memory
+    } catch(Exception e) {
+      Interact.errmes("error in prolog_compiler.add_instr",e);
+      return false;
+    }
+    return true;
+  }
+  
+  public static int jcompile(String file,LogicInteractor E) {
+    LogicInteractor M=LogicInteractor.new_interactor(E);
+    M.protect_engine();
+    boolean ok=jcompile_with(file,M);
+    M.unprotect_engine();
+    return ok?1:0;
+  }
+  
+  public static boolean jcompile_with(String file,LogicInteractor M) {
+    // LogicInteractor M=LogicInteractor.new_interactor0(0,null);
+    Var answer=new Var(0);
+    Fun query=new Fun(":-",answer,new Fun("term_of",file,answer));
+    if(!M.load_engine(query))
+      return false;
+    for(;;) {
+      Object T=M.ask_interactor();
+      if(null==T)
+        break;
+      if("no".equals(T))
+        break;
+      Interact.println(T);
+      
+      /*
+      Object term=get_term(R);
+      if(term==null || term.toString().startsWith("end_of_file" )) break; // EOF or Exception    
+      
+      if(delegating) {
+        compile_with_existing(clausify(term));
+      }
+      */
+      Object term=((Fun)T).args[0];
+      if(!compile_clause(M,term)) {
+        Interact.warnmes("compilation error");
+        break; // if compilation error
+      }
+      
+    }
+    // machine.run("jterminate('"+topfile+"',mem)"); // to memory
+    return true;
+  }
+  
+  /**
+   * needed for "reverse enginering" what the Prolog based compiler does
+   */
+  public boolean compile_with_existing(LogicInteractor M,Object T) {
+    // String query="sread_term("+s+",T,_),translate(T,mem,eq(_))";
+    Object query=new Fun("translate",T,"mem",new Fun("eq",new Var(9999)));
+    
+    if(trace) {
+      p("query="+query);
+    }
+    Object answer=M.query_engine(query);
+    if(trace) {
+      p("answer="+answer);
+    }
+    return true;
+  }
+  
+  static void p(String s) {
+    Interact.println(s);
+  }
+  
+  /*
+  public void p(String s) {
+    println(s);
+  }
+  */
+
+  /**
+   * modify this to generate actual instructions !!!
+   */
+  public static boolean compile_clause(LogicInteractor M,Object O) {
+    // testing binarization
+    Object B=binarize(O);
+    p("Clause===> "+O);
+    p("Binary===> "+B);
+    ArrayList V=walkTree(B);
+    p("WalkTree result ArrayList: "+V);
+    
+    // p("NODES===> "+countNodes(O));
+    // p("LEAVES===> "+getLeaves(O));
+    
+    /*
+    add_instr(CLAUSE,0,"a",2);
+    add_instr(FIRSTARG,3,"99",0);
+    add_instr(GET_CONSTANT,1,"99",0);
+    add_instr(MOVE_REG,1,"",2);
+    //add_instr(DEMO_0,1,"$demo",1); //EXEC DEMO
+    add_instr(EXECUTE,0,"$demo",1);
+    //add_instr(END,0,"",0);
+    */
+
+    /*
+    add_instr(CLAUSE,0,"b",2);
+    add_instr(FIRSTARG,3,"_",0);
+    add_instr(EXECUTE,1,"a",2);
+    add_instr(END,0,"",0);
+    add_instr(END,0,"",0);
+    */
+    // return add_instr(END,0,"",0); // dummy instr
+    return add_instr(M,0,0,"",0); // dummy instr
+  }
+  
+  static Fun binarizeBody(Object T,Object Cont) {
+    if(T instanceof Fun&&((Fun)T).name.equals(",")&&getArity(((Fun)T))==2) {
+      Fun F=(Fun)T;
+      Object first=F.args[0];
+      Object second=F.args[1];
+      Fun B=binarizeBody(second,Cont);
+      return addCont(first,B);
+    } else
+      return addCont(T,Cont);
+  }
+  
+  static Fun binarize(Object O) {
+    Fun C=toClause(O);
+    Var Cont=new Var(1000000);
+    Object Head=C.args[0];
+    Object Body=C.args[1];
+    Fun NewHead=addCont(Head,Cont);
+    Fun NewBody=binarizeBody(Body,Cont);
+    Object[] newargs=new Object[2];
+    newargs[0]=NewHead;
+    newargs[1]=NewBody;
+    return new Fun(":-",newargs);
+  }
+  
+  static Fun toClause(Object T) {
+    if(T instanceof Fun&&((Fun)T).name.equals(":-")&&getArity(((Fun)T))==2)
+      return (Fun)T;
+    Object[] args=new Object[2];
+    args[0]=T;
+    args[1]="$demo";
+    Fun C=new Fun(":-",args);
+    return C;
+  }
+  
+  static public Fun clausify(Object T) {
+    if(T instanceof Fun) {
+      Fun FunT=(Fun)T;
+      if(getArity(FunT)==2&&FunT.name.equals(":-"))
+        return FunT;
+    }
+    return new Fun(":-",T,"true");
+  }
+  
+  static int getArity(Fun T) {
+    return T.args.length;
+  }
+  
+  static Fun addCont(Object O,Object Cont) {
+    if(O instanceof String) {
+      Object[] newargs=new Object[1];
+      newargs[0]=Cont;
+      Fun NewT=new Fun(O,newargs);
+      return NewT;
+    }
+    Fun T=(Fun)O;
+    int n=getArity(T);
+    Object[] newargs=new Object[n+1];
+    System.arraycopy(T.args,0,newargs,0,n);
+    newargs[n]=Cont;
+    Fun NewT=new Fun(T.name,newargs);
+    return NewT;
+  }
+  
+  int countNodes(Object O) {
+    p("count_trace: "+O);
+    if(!(O instanceof Fun))
+      return 1;
+    Fun F=(Fun)O;
+    int count=1;
+    for(int i=0;i<F.args.length;i++) {
+      count+=countNodes(F.args[i]);
+    }
+    return count;
+  }
+  
+  ArrayList getLeaves(Object O) {
+    ArrayList V=new ArrayList();
+    try {
+      getLeaves(O,V);
+    } catch(Exception e) {
+      Interact.errmes("error in getLeaves",e);
+    }
+    return V;
+  }
+  
+  void getLeaves(Object O,ArrayList V) {
+    if(!(O instanceof Fun))
+      V.add(O);
+    else {
+      Fun F=(Fun)O;
+      for(int i=0;i<F.args.length;i++) {
+        getLeaves(F.args[i],V);
+      }
+    }
+  }
+  
+  static ArrayList walkTree(Object O) {
+    ArrayList V=new ArrayList();
+    LinkedHashMap H=new LinkedHashMap();
+    
+    try {
+      Fun C=(Fun)O;
+      Fun Head=(Fun)C.args[0];
+      Fun Body=(Fun)C.args[1];
+      walkHead(Head,V,0,H);
+      walkBody(Body,V,0,H);
+    } catch(Exception e) {
+      Interact.errmes("error in walkTree",e);
+    }
+    return V;
+  }
+  
+  static void walkHead(Object O,ArrayList V,int depth,LinkedHashMap H) {
+    if(O instanceof Var) {
+      if(null!=H.get(O)) {
+        V.add("GETVAL:"+O);
+      } else {
+        H.put(O,new Integer(0));
+        V.add("GETVAR:"+O);
+      }
+      
+    } else if(O instanceof Fun) {
+      Fun F=(Fun)O;
+      for(int i=0;i<F.args.length;i++) {
+        walkHead(F.args[i],V,depth+1,H);
+      }
+      String part=(0==depth)?("CLAUSE"):("GET_STRUCTURE");
+      V.add(part+":"+F.name+"/"+F.args.length);
+      for(int i=0;i<F.args.length;i++) {
+        // VAR, VAL, CONST, FUN=>TEMP
+        walkHeadArg(F.args,i,V,depth,H);
+      }
+    } else {
+      V.add("GETCONST:"+O);
+    }
+    
+  }
+  
+  static void walkHeadArg(Object[] args,int i,ArrayList V,int depth,
+      LinkedHashMap H) {
+    V.add("GETARG["+i+"]:"+depth);
+  }
+  
+  static void walkBody(Object O,ArrayList V,int depth,LinkedHashMap H) {
+    if(O instanceof Var) {
+      if(null!=H.get(O)) {
+        V.add("PUTVAL:"+O);
+      } else {
+        H.put(O,new Integer(0));
+        V.add("PUTVAR:"+O);
+      }
+    }
+
+    else if(O instanceof Fun) {
+      Fun F=(Fun)O;
+      for(int i=0;i<F.args.length;i++) {
+        walkBody(F.args[i],V,depth+1,H);
+      }
+      
+      if(depth>0)
+        V.add("PUT_STRUCTURE: "+F.name+"/"+F.args.length);
+      for(int i=0;i<F.args.length;i++) {
+        walkBodyArg(F.args,i,V,depth,H);
+        // VAR, VAL, CONST, FUN=>TEMP
+      }
+      if(depth==0)
+        V.add("EXECUTE: "+F.name+"/"+F.args.length);
+    } else {
+    }
+    // V.add("PUTCONST:"+O);
+  }
+  
+  static void walkBodyArg(Object[] args,int i,ArrayList V,int depth,
+      LinkedHashMap H) {
+    // V.add("PUTARG["+i+"]:"+depth);
+    Object arg=args[i];
+    if(arg instanceof Var) {
+      // look it up
+      // if found is _VAL
+      // else add it and is a _VAR
+      if(null!=H.get(arg)) {
+        V.add("PUT_VAL["+i+"]:"+depth);
+      } else {
+        H.put(arg,new Integer(0));
+        V.add("PUT_VAR["+i+"]:"+depth);
+      }
+      
+    } else if(arg instanceof Fun) {
+      // look it up - should have a Var in H attached to it
+      V.add("PUT_FUN_VA?["+i+"]:"+depth+"(TEMP)");
+    } else
+      V.add("PUT_CONST["+i+"]:"+depth);
+  }
+  
+  public static void main(String[] args) {
+    LogicInteractor M=Start.initProlog(args);
+    jcompile_with("test.pl",M);
+  }
+}

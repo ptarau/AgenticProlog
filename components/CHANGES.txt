@@ -1,0 +1,179 @@
+See README.txt in various component directories (in src)
+
+Dov 25-Dec 1 2024 - clean-up and refactoring of non-portable code has started
+
+Aug 24-29, 2015: bug fixes: 
+ground/1
+explicit_bindings+term_variables (Paulo’s fixes)
+
+added: call_det/2,3 to iso.pl
+
+added GSON interface
+
+dec 2014-May 2015 - 64 bit heap words (ints->long)
+
+======================
+
+july 31 - remote_run + linda with bundel_read and write working with large terms
+june 16 - spin off fast growing nlp tools in "applications/src/nlp"
+june 12
+    major change in help - it is now Java based, fast and
+    the generation process takes 5 seconds insteand of 40 seconds
+    it also brings down lprolog.jar to
+    375K from 1M++
+
+june 11:
+     fixes in graphs - now BigDecimals are used instead of Doubles as return values
+     this was crashing as Double tipes have been completely replaced with BigDecimals
+     in the Xbuiltins interface
+    
+june 1-10
+    nlp tools slowly merged in as a component
+    assumes large data files in directory $HOME/Desktop/sit/data/*
+         
+may 26:
+    xml_converter now finished - handles attributes
+    also, there's clen-up at Java level we now
+    avoid sending messages for empty chars etc.
+    see: FullXMLHandler.java
+    
+    on the prolog side - one can just assert the events to an
+    indexed database to be further processed and/or queried
+    
+    ideally one db per xml file
+    
+may 13:
+    fixed bug in predicate_property(atomic_goal,_)
+    
+may 12:
+   agents are now testing for free ports
+   
+May 11:
+
+spawn_agent_group(Name,ListOfAgentNames) and 
+
+kill_agent_group(Name)
+
+also added stop_agent_tracer and stop_s_console(Host,Port).
+
+In is a "one broker, multiple processes design" - really, really simple.
+A process maps to agents sharing code - typically a layer.
+Having one broker means they talk to each other by name.
+The "leader" of a group is just an agent that starts the others
+in the process.
+
+May 10:
+
+fixed spawn_quiet_agent, changed lprolog to accept compound term args
+added agent_tracer - to tackle the problem of processes without
+output console
+
+try:
+
+window 1:
+?- agent_tracer.
+
+window 2: 
+main ?- spawn_agent(a).
+Server listening on port: 5000
+true.
+main ?- spawn_quiet_agent(b).
+true.
+main ?- ask_agent(b,X=1).
+X = 1
+main ?- kill_agent_process(b).
+true.
+main ?- kill_agent_process(a).
+true.
+main ?- halt.
+
+May 8
+
+   - added dcg_star etc to compat.pl
+   - added find_free_port/3, /1 - see help
+        added spawn_quiet_agent
+        made spawn_agent accept list or non-list args
+        bug fixes in wait_agent 
+        
+April 24
+  
+  - ensured that Agent:Goal works, as expected, in the agent's symbol space
+    and local database - make sure you use agent_call(Goal) etc. for things
+    loaded with agent_consult
+  - gui changed such that gui_agents in gui window see their space through
+    s_call
+
+April 23
+   - added spawn_agent and kill_agent_process to launch agents in separate processes
+     note that the a new broker (unless one xists) always run in the launcher's process
+     (see help on them)
+     
+April 22    
+   - added agent_assert and friends
+   - added appendN = append for legacy code compatibilty
+    
+April 18
+   - stop_all_agents added,
+   - broker_state added
+   - ping_broker, ping_agent
+   
+April 15
+   - various changes + major debugging in agents: stop_all_agents
+   - bigtest now runs with 1000
+April 10
+   - added new_s_agent, new_m_agent,new_gui_agent 
+April 5
+  - bug fixes in s_call/s_server - synchronized static method was blocking
+    under heavy use
+  - thread compatible I/O - println now uses hidden inner server to make
+    sure println from multiple threads works like a "transaction"
+  - mbg, new_task, run_tasks - a fork/join mechanism for
+    simple and safe multithreading
+
+March 31
+
+- added broker.pl in agents, trimmed down naming.pl
+- added remote_wait, remote_ping
+      changes in net.pl - classic client server interface,
+       with run_server, remote_run etc.
+       
+March 21:
+    added int_sqrt
+    
+March 9:
+    added module net - implements backward compatible
+    run_server + remote_run + http_server
+  
+    note: binprolog only work in server mode on os x - to be fixed
+    
+March 5, 2010
+
+new module
+    src/net - adds networking supporting backgrounding server
+    src/agents now contains 3 linda implementations,
+    the default one backward compatible with old Prolog
+    has been ported - see code in bboards.pl
+
+module agents now also includes:
+    callback_linda.pl - using callback to a server port
+    coop_linda.pl - using cooperative coordination between engines
+                    without requiring threads
+
+March 5, 2010: moved in Linda+Agents in src/agents - renamed callback_linda
+
+    - test it with:
+        Window 1: linda_server.
+        Window 2: lclient1
+        Window 3: lclient2
+        
+        
+2009 Dec 20 compat: various additions for compatibility with other Prologs
+
+2010 Jan 10 started work on jcompile - fast Java based compiler
+
+2010 Jan 20 added AWT GUI support
+  -- see src/gui/gui.pl for what is covered
+  
+2010 Feb 1
+   -- added graphs - Java based graph (backward compatible with old Prolog)
+   -- provides PageRank, Cat etc. 

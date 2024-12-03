@@ -1,0 +1,5 @@
+echo "assumes bp (BinProlog) is in your path"
+pushd .
+cd compiler
+bp "bpco.pl" "call(and(lboot,halt))"
+popd

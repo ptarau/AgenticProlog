@@ -1,0 +1,2 @@
+build.sh
+java -cp "../../lib/jcompiler.jar:../../../prologL/lprolog.jar" jcompiler.Compiler ../../../prologL/lprolog.jar

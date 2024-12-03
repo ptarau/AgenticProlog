@@ -1,0 +1,7 @@
+ rm -r -f bin
+mkdir bin
+pushd .
+cd psrc
+rm -f *.wam
+popd
+mv -f lprolog.jar bak
