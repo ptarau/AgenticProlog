@@ -15,17 +15,26 @@ replay_pid*
 .DS_Store
 
 BIGTRASH
+
 prologL/TRASH
+
+prologL/bin
+prologL/lpl
+
+lprolog.jar
+
+prologL/lprolog.jar
+prologL/bak/lprolog.jar
+
 components/CTRASH
 components/src/xml_converter
-prologL/bin
 components/bin
+components/agpl
+components/lprolog.jar
+
 applications
 tests
-components/agpl
-prologL/lpl
-prologL/bak/lprolog.jar
-prologL/lprolog.jar
-components/lprolog.jar
+
+
 
 

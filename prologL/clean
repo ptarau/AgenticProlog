@@ -4,4 +4,4 @@ pushd .
 cd psrc
 rm -f *.wam
 popd
-mv -f lprolog.jar bak
+rm -f lprolog.jar

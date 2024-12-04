@@ -1,7 +1,7 @@
 java -classpath lprolog.jar help.Help
 rm -f lprolog.jar
 cp ../prologL/lprolog.jar .
-java -jar lprolog.jar lprolog.jar "fcompile(all)" halt
+java -jar lprolog.jar lprolog.jar "fcompile(all),halt"
 jar -xvf lprolog.jar lwam.bp
 mv -f lwam.bp lwam0.bp
 cat lwam0.bp all.wam > lwam.bp
