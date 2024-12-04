@@ -25,5 +25,7 @@ tests
 components/agpl
 prologL/lpl
 prologL/bak/lprolog.jar
+prologL/lprolog.jar
+components/lprolog.jar
 
 
