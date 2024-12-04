@@ -35,6 +35,7 @@ components/lprolog.jar
 applications
 tests
 
-
+# add back if code in psrc changes in prologL
+prologL/bak/wam.bp
 
 
