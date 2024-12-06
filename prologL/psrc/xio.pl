@@ -207,6 +207,7 @@ get_char(X):-get_code(C),char_code(X,C).
 get_char(F,X):-get_code(F,C),char_code(X,C).
 
 statistics(runtime,[T,0]):-cputime(X),T is X*1000.
+statistics(cputime,T):-cputime(T).
 statistics(symbols,X):-symbols(X).
 statistics(engines,X):-engines(X).
 statistics(heapsizes,X):-heapsizes(X).

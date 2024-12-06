@@ -27,4 +27,4 @@ ints(N,Is):-findall(I,for(I,1,N),Is).
 go(N):-ctime(T1),ints(N,Ps),travel(Ps,Route),ctime(T2),T is T2-T1,
   write(time(T)+route(Route)),nl.
 
-go:-go(7).
+go:-go(8).

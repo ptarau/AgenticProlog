@@ -48,23 +48,23 @@ g5(N,Ps):-nats(1,N,Ns),alt_findall(P,permute(Ns,P),Ps).
 
 test(Mes,X):-
   Iter=10,
-  statistics(runtime,[T1,_]),
+  statistics(cputime,T1),
 	(between(1,Iter,_),X,fail;true),
-  statistics(runtime,[T2,_]),
+  statistics(cputime,T2),
   T is T2-T1,
   write('++++>'),write(Mes),write(' time='),write(T),nl.
 
-t0:-test('perms:',g0(8)).
+t0:-test('perms:',g0(9)).
+t0a:-test('perms:',g0(10)).
 
 t1:-test('allperms:',g1(8,_)).
 
 t2:-test('allperms with findall:',g2(8,_)).
 
-t3:-test('allperms + maplist + copyterm:',g3(8,_)).
+t3:-test('allperms + maplist + copyterm:',g3(7,_)).
 
 t4:-test('allperms + copyterm:',g4(8)).
 
 t5:-test('allperms with alt_findall:',g5(8,_)).
 
-go:-(nl,t0,fail;t1,fail;t2,fail;nl).
-
+go:-(nl,t0,fail;t1,fail;t2,fail;t3,fail;t4,fail;nl,halt).

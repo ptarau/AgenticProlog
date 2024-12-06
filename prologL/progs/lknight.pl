@@ -48,9 +48,9 @@ move(-1,-2).
 
 
 xtime(G,T):-
-  statistics(runtime,[T1,_]),
+  statistics(cputime,T1),
   (G->true;true),
-  statistics(runtime,[T2,_]),
+  statistics(cputime,T2),
   T is T2-T1.
   
   
