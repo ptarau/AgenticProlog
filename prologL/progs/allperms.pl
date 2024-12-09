@@ -59,7 +59,7 @@ t0a:-test('perms:',g0(10)).
 
 t1:-test('allperms:',g1(8,_)).
 
-t2:-test('allperms with findall:',g2(8,_)).
+t2:-test('allperms with findall:',g2(9,_)).
 
 t3:-test('allperms + maplist + copyterm:',g3(7,_)).
 

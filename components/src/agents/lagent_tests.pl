@@ -39,8 +39,6 @@ kill_spaces:-
   foreach(launched(Process),kill_my_process(Process)),
   retractall(launched(_)).
   
-  
-  
 
 local_agent_test:-
   assert(friends(cool_people)),
@@ -57,7 +55,6 @@ local_agent_test:-
   foreach(cindy@hate(X),println(cindy:hates(X))).
   
  
- agtest1:-
   %alice@[bob,cindy], % alice follows bob and cindy
   alice@[bob], % alice follows bob
  
