@@ -19,7 +19,7 @@ the additions in components/src
 More to come, the focus is on components/agents, see also
 papers in folder docs for where we a re heading.
 
-Next, LVM adaptors and the LVM agents will be added to the framework.
+Next, Prolog adaptors and the Prolog agents will be added to the framework.
 
 Enjoy,
 Paul Tarau
