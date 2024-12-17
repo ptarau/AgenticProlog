@@ -52,7 +52,7 @@ local_agent_test:-
   foreach(cindy@friends(X),println(friends:X)),
   foreach(bob@like(X),println(bob:likes(X))),
   foreach(alice@like(X),println(alice:likes(X))),
-  foreach(cindy@hate(X),println(cindy:hates(X))).
+  foreach(cindy@hate(X),println(cindy:hates(X))),
   
  
   %alice@[bob,cindy], % alice follows bob and cindy
